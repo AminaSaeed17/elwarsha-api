@@ -98,9 +98,9 @@ async function main(): Promise<void> {
     },
     {
       weekNumber: 3,
-      title: "Asynchronous flow: webhook verification and background queue",
+      title: "Database migrations, Zod runtime contracts & server state",
       status: "published" as const,
-      labels: ["backend", "worker"],
+      labels: ["database", "contract", "frontend"],
     },
     {
       weekNumber: 4,
