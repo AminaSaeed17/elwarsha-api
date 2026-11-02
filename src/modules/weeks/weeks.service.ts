@@ -213,7 +213,10 @@ export class WeeksService {
 
     const isCurrent = cWeek.weekNumber === cohortRef.currentWeekNumber;
     let effectiveStatus: "completed" | "active" | "upcoming" | "draft" = schedule.status;
-    if (dbAssignment?.status === "closed" || cWeek.weekNumber < cohortRef.currentWeekNumber) {
+    if (
+      dbAssignment?.status === "closed" ||
+      cWeek.weekNumber < cohortRef.currentWeekNumber
+    ) {
       effectiveStatus = "completed";
     } else if (cWeek.weekNumber === cohortRef.currentWeekNumber) {
       effectiveStatus = "active";
