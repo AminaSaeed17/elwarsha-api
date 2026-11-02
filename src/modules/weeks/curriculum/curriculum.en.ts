@@ -1064,53 +1064,6 @@ Once your core PR is green and verified using the built-in fake provider, test y
   },
   5: {
     weekNumber: 5,
-    title: "Safe Schema Migrations & Zero-Downtime Data Evolution",
-    tagline: "Evolving production schemas requires disciplined expand-and-contract steps",
-    concept: "Database migrations",
-    guidingQuestion:
-      "How do we migrate a busy production table without taking the service down?",
-    bigIdea:
-      "In production environments, columns cannot simply be dropped or renamed in a single step without breaking active clients. We implement the Expand-and-Contract migration pattern in Prisma and PostgreSQL to evolve relational schemas seamlessly.",
-    outcomes: [
-      "Write backward-compatible database migrations in Prisma.",
-      "Decouple dual-write and dual-read phases during entity schema evolutions.",
-    ],
-    coreConcepts: ["Expand and Contract pattern", "Zero-downtime database migrations"],
-    appliedThroughTheStack: [
-      {
-        layer: "Prisma",
-        details: "Careful schema migrations without destructive column drops.",
-      },
-      { layer: "PostgreSQL", details: "Safe indexing and non-blocking constraints." },
-    ],
-    assignment: {
-      title: "Expand and Contract Schema Migration",
-      summary:
-        "Migrate database schema with non-breaking expand, dual-write, and contract phases.",
-      detailsMd: `### Deliverables
-- **Expand Migration**: Add nullable column to Prisma schema.
-- **Dual-write**: Service writes to both old and new columns.`,
-    },
-    resources: {
-      required: [
-        {
-          title: "Zero-downtime database migrations guide",
-          url: "https://www.prisma.io/dataguide/types/relational/zero-downtime-migrations",
-          layers: "Database",
-          format: "Read",
-          time: "20 min",
-          why: "Safe evolutionary database design principles.",
-        },
-      ],
-      assignment: [],
-      alternative: [],
-    },
-    reflectionQuestion:
-      "Why must you not delete a database column in the same PR that stops using it?",
-    prerequisites: ["Week 4"],
-  },
-  6: {
-    weekNumber: 6,
     title: "Testing, Quality & Evaluation Loops",
     tagline: "Use executable evidence to control change",
     concept: "Testing and evaluation",
@@ -1160,7 +1113,7 @@ Once your core PR is green and verified using the built-in fake provider, test y
       title: "Audit & Harden the Cohort Application Tests",
       summary:
         "Build a risk-based test matrix, harden the web form tests, add the missing ApplicationsService unit tests, prove each side's tests by breaking the code on purpose, and compare human and AI review findings.",
-      detailsMd: `### Week 6 Assignment: Audit & Harden the Cohort Application Tests
+      detailsMd: `### Week 5 Assignment: Audit & Harden the Cohort Application Tests
 
 **Deliverable:** one PR to each repository. Each PR description contains sections 1–6 below. If a PR is too large to review in about 20 minutes, split it.
 
@@ -1471,7 +1424,54 @@ Role and label queries pass, which shows that controls have accessible roles and
     },
     reflectionQuestion:
       "What would a flaky end-to-end test hide that a focused unit test would show?",
-    prerequisites: ["Week 5", "Docker Compose Postgres"],
+    prerequisites: ["Week 4", "Docker Compose Postgres"],
+  },
+  6: {
+    weekNumber: 6,
+    title: "Safe Schema Migrations & Zero-Downtime Data Evolution",
+    tagline: "Evolving production schemas requires disciplined expand-and-contract steps",
+    concept: "Database migrations",
+    guidingQuestion:
+      "How do we migrate a busy production table without taking the service down?",
+    bigIdea:
+      "In production environments, columns cannot simply be dropped or renamed in a single step without breaking active clients. We implement the Expand-and-Contract migration pattern in Prisma and PostgreSQL to evolve relational schemas seamlessly.",
+    outcomes: [
+      "Write backward-compatible database migrations in Prisma.",
+      "Decouple dual-write and dual-read phases during entity schema evolutions.",
+    ],
+    coreConcepts: ["Expand and Contract pattern", "Zero-downtime database migrations"],
+    appliedThroughTheStack: [
+      {
+        layer: "Prisma",
+        details: "Careful schema migrations without destructive column drops.",
+      },
+      { layer: "PostgreSQL", details: "Safe indexing and non-blocking constraints." },
+    ],
+    assignment: {
+      title: "Expand and Contract Schema Migration",
+      summary:
+        "Migrate database schema with non-breaking expand, dual-write, and contract phases.",
+      detailsMd: `### Deliverables
+- **Expand Migration**: Add nullable column to Prisma schema.
+- **Dual-write**: Service writes to both old and new columns.`,
+    },
+    resources: {
+      required: [
+        {
+          title: "Zero-downtime database migrations guide",
+          url: "https://www.prisma.io/dataguide/types/relational/zero-downtime-migrations",
+          layers: "Database",
+          format: "Read",
+          time: "20 min",
+          why: "Safe evolutionary database design principles.",
+        },
+      ],
+      assignment: [],
+      alternative: [],
+    },
+    reflectionQuestion:
+      "Why must you not delete a database column in the same PR that stops using it?",
+    prerequisites: ["Week 5"],
   },
   7: {
     weekNumber: 7,

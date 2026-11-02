@@ -110,15 +110,16 @@ async function main(): Promise<void> {
     },
     {
       weekNumber: 5,
-      title: "Validation and reliability: request schemas and error envelopes",
+      title:
+        "Testing, quality & evaluation loops: audit application tests and deliberate breaks",
       status: "draft" as const,
-      labels: ["backend", "frontend"],
+      labels: ["testing", "quality"],
     },
     {
       weekNumber: 6,
-      title: "Testing: unit tests and isolated regression coverage",
+      title: "Safe schema migrations & zero-downtime data evolution",
       status: "draft" as const,
-      labels: ["testing", "quality"],
+      labels: ["database", "backend"],
     },
     {
       weekNumber: 7,
