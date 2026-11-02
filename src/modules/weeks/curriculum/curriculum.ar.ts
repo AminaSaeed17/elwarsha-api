@@ -1034,52 +1034,6 @@ export const curriculumAr: Record<number, CurriculumWeek> = {
   },
   5: {
     weekNumber: 5,
-    title: "تعديل المخطط وقواعد البيانات بلا انقطاع",
-    tagline: "تغيير قواعد البيانات الحية يتطلب خطوات توافقية دقيقة",
-    concept: "هجرة قواعد البيانات",
-    guidingQuestion: "إزاي نعمل هجرة لجدول مستخدم في الإنتاج من غير ما نوقف الخدمة؟",
-    bigIdea:
-      "في الأنظمة الحية، لا يمكن إسقاط الأعمدة أو تعديلها بخطوة واحدة مفاجئة. نتعلّم نمط Expand and Contract لتنفيذ هجرات Prisma آمنة بدون أي انقطاع في الخدمة.",
-    outcomes: [
-      "كتابة هجرات آمنة تدعم التوافق مع الإصدارات السابقة.",
-      "فصل قراءة البيانات عن كتابتها أثناء مراحل الانتقال.",
-    ],
-    coreConcepts: [
-      "نمط التوسيع والانكماش (Expand and Contract)",
-      "الهجرة الآمنة (Zero-Downtime Migrations)",
-    ],
-    appliedThroughTheStack: [
-      { layer: "Prisma", details: "إدارة الهجرات وتحديث schema.prisma بحذر." },
-      { layer: "PostgreSQL", details: "فهارس آمنة وقيود لا تعطل الجداول." },
-    ],
-    assignment: {
-      title: "هجرة آمنة لجدول حي بنمط Expand and Contract",
-      summary:
-        "توسيع مخطط قاعدة البيانات بإضافة أعمدة جديدة مع دعم التوافق التراجعي الكامل.",
-      detailsMd: `### المخرجات البرمجية
-- **هجرة التوسيع (Expand)**: إضافة الحقل الجديد كحقل اختياري.
-- **الكتابة المزدوجة (Dual-write)**: تحديث الخدمة لتكتب في الحقلين القديم والجديد معاً.`,
-    },
-    resources: {
-      required: [
-        {
-          title: "دليل الهجرة بدون توقف الخدمة (Prisma)",
-          url: "https://www.prisma.io/dataguide/types/relational/zero-downtime-migrations",
-          layers: "Database",
-          format: "Read",
-          time: "٢٠ دقيقة",
-          why: "فهم استراتيجيات هجرة قواعد البيانات الإنتاجية.",
-        },
-      ],
-      assignment: [],
-      alternative: [],
-    },
-    reflectionQuestion:
-      "ليه مينفعش نمسح عمود من قاعدة البيانات في نفس الـ PR اللي بيوقف استخدامه في الكود؟",
-    prerequisites: ["الأسبوع الرابع"],
-  },
-  6: {
-    weekNumber: 6,
     title: "الاختبارات والجودة وحلقات التقييم",
     tagline: "استخدم أدلة قابلة للتشغيل للتحكم في التغيير",
     concept: "الاختبارات والتقييم",
@@ -1128,7 +1082,7 @@ export const curriculumAr: Record<number, CurriculumWeek> = {
       title: "مراجعة وتقوية اختبارات التقديم للدفعة",
       summary:
         "ابنِ مصفوفة اختبارات مبنية على المخاطر، وقوِّ اختبارات نموذج الواجهة، وأضف اختبارات الوحدة الناقصة لـ ApplicationsService، وأثبت اختبارات كل طرف بكسر الكود عمداً، وقارن ملاحظات المراجعة البشرية بملاحظات الذكاء الاصطناعي.",
-      detailsMd: `### مهمة الأسبوع السادس: مراجعة وتقوية اختبارات التقديم للدفعة
+      detailsMd: `### مهمة الأسبوع الخامس: مراجعة وتقوية اختبارات التقديم للدفعة
 
 **المطلوب تسليمه:** طلب دمج (PR) واحد لكل مستودع. وصف كل PR يحتوي على الأقسام ١–٦ أدناه. إذا كانت مراجعة الـ PR تحتاج أكثر من ٢٠ دقيقة تقريباً، قسّمه.
 
@@ -1444,7 +1398,53 @@ export const curriculumAr: Record<number, CurriculumWeek> = {
     },
     reflectionQuestion:
       "ما الذي قد يخفيه اختبار من طرف لطرف غير مستقر (flaky) ويكشفه اختبار وحدة مركّز؟",
-    prerequisites: ["الأسبوع الخامس", "Docker Compose Postgres"],
+    prerequisites: ["الأسبوع الرابع", "Docker Compose Postgres"],
+  },
+  6: {
+    weekNumber: 6,
+    title: "تعديل المخطط وقواعد البيانات بلا انقطاع",
+    tagline: "تغيير قواعد البيانات الحية يتطلب خطوات توافقية دقيقة",
+    concept: "هجرة قواعد البيانات",
+    guidingQuestion: "إزاي نعمل هجرة لجدول مستخدم في الإنتاج من غير ما نوقف الخدمة؟",
+    bigIdea:
+      "في الأنظمة الحية، لا يمكن إسقاط الأعمدة أو تعديلها بخطوة واحدة مفاجئة. نتعلّم نمط Expand and Contract لتنفيذ هجرات Prisma آمنة بدون أي انقطاع في الخدمة.",
+    outcomes: [
+      "كتابة هجرات آمنة تدعم التوافق مع الإصدارات السابقة.",
+      "فصل قراءة البيانات عن كتابتها أثناء مراحل الانتقال.",
+    ],
+    coreConcepts: [
+      "نمط التوسيع والانكماش (Expand and Contract)",
+      "الهجرة الآمنة (Zero-Downtime Migrations)",
+    ],
+    appliedThroughTheStack: [
+      { layer: "Prisma", details: "إدارة الهجرات وتحديث schema.prisma بحذر." },
+      { layer: "PostgreSQL", details: "فهارس آمنة وقيود لا تعطل الجداول." },
+    ],
+    assignment: {
+      title: "هجرة آمنة لجدول حي بنمط Expand and Contract",
+      summary:
+        "توسيع مخطط قاعدة البيانات بإضافة أعمدة جديدة مع دعم التوافق التراجعي الكامل.",
+      detailsMd: `### المخرجات البرمجية
+- **هجرة التوسيع (Expand)**: إضافة الحقل الجديد كحقل اختياري.
+- **الكتابة المزدوجة (Dual-write)**: تحديث الخدمة لتكتب في الحقلين القديم والجديد معاً.`,
+    },
+    resources: {
+      required: [
+        {
+          title: "دليل الهجرة بدون توقف الخدمة (Prisma)",
+          url: "https://www.prisma.io/dataguide/types/relational/zero-downtime-migrations",
+          layers: "Database",
+          format: "Read",
+          time: "٢٠ دقيقة",
+          why: "فهم استراتيجيات هجرة قواعد البيانات الإنتاجية.",
+        },
+      ],
+      assignment: [],
+      alternative: [],
+    },
+    reflectionQuestion:
+      "ليه مينفعش نمسح عمود من قاعدة البيانات في نفس الـ PR اللي بيوقف استخدامه في الكود؟",
+    prerequisites: ["الأسبوع الخامس"],
   },
   7: {
     weekNumber: 7,

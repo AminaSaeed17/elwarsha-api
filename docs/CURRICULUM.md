@@ -118,35 +118,11 @@ the cookie contract.
 **Reflection:** Where should a new capability be declared so controllers stay
 thin?
 
-## Week 5 — Validation and reliability
-
-**Outcome:** Return the shared error envelope and reject invalid input at the
-boundary.
-
-**Prerequisites:** Weeks 3–4.
-
-**Entry points:** `src/common/http-exception.filter.ts`, `src/common/errors.ts`,
-`src/config/env.ts`.
-
-| Order | Small task                                                       | Observable behavior                       | Focused check                                            |
-| ----- | ---------------------------------------------------------------- | ----------------------------------------- | -------------------------------------------------------- |
-| 5.1   | Trigger one `AppError` and confirm the envelope shape            | `{ error: { code, message, requestId } }` | One HTTP test                                            |
-| 5.2   | Validate one request or env value with existing Zod/env patterns | Invalid value fails closed                | `yarn test src/config/env.spec.ts` or a new focused spec |
-| 5.3   | Add retry or lastError visibility for one failed job path        | Failed job remains retryable              | Job service test                                         |
-
-**Core increment:** 5.1 or 5.2, not both in one PR.
-
-**Stretch:** Propose a webhook payload schema without inventing GitHub fields.
-
-**Evidence:** Test that asserts the envelope or the rejected input.
-
-**Reflection:** What must never leak in `error.message`?
-
-## Week 6 — Testing, quality & evaluation loops
+## Week 5 — Testing, quality & evaluation loops
 
 **Outcome:** Show that a test protects a behavior by breaking that behavior on purpose and watching it fail.
 
-**Prerequisites:** Weeks 4–5. Local Postgres (`docker compose up -d`) for the e2e suite.
+**Prerequisites:** Week 4. Local Postgres (`docker compose up -d`) for the e2e suite.
 
 **Entry points:** `src/modules/applications/`, `test/app.e2e-spec.ts`,
 `vitest.config.ts`, `vitest.config.e2e.ts`, `.github/workflows/ci.yml`. In
@@ -154,19 +130,41 @@ elwarsha-web: `src/features/apply/CohortApplicationForm.test.tsx`, `e2e/`.
 
 | Order | Small task                                                                                   | Observable behavior                                           | Focused check                                        |
 | ----- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------- |
-| 6.1   | Write a risk-based test matrix for the apply flow and keep only the justified rows           | Matrix in the PR with behavior, risk, level, file, and status | Review of the matrix                                 |
-| 6.2   | Create `applications.service.spec.ts` for duplicate email (any letter case) and handle       | Spec fails when `.toLowerCase()` is removed from the email    | `yarn test`, then the break/restore run              |
-| 6.3   | Harden `CohortApplicationForm.test.tsx`: `user-event`, role queries, accessible descriptions | No `fireEvent`; 422 error linked to its field                 | `yarn test` and `yarn vitest run --sequence.shuffle` |
-| 6.4   | Break one production behavior per repo on purpose, then restore it                           | A named test goes red, then green                             | Red and green runs in the PR                         |
-| 6.5   | Classify your review notes and one AI review as valid, false positive, or uncertain          | A findings table with one reason per row                      | Review of the table                                  |
+| 5.1   | Write a risk-based test matrix for the apply flow and keep only the justified rows           | Matrix in the PR with behavior, risk, level, file, and status | Review of the matrix                                 |
+| 5.2   | Create `applications.service.spec.ts` for duplicate email (any letter case) and handle       | Spec fails when `.toLowerCase()` is removed from the email    | `yarn test`, then the break/restore run              |
+| 5.3   | Harden `CohortApplicationForm.test.tsx`: `user-event`, role queries, accessible descriptions | No `fireEvent`; 422 error linked to its field                 | `yarn test` and `yarn vitest run --sequence.shuffle` |
+| 5.4   | Break one production behavior per repo on purpose, then restore it                           | A named test goes red, then green                             | Red and green runs in the PR                         |
+| 5.5   | Classify your review notes and one AI review as valid, false positive, or uncertain          | A findings table with one reason per row                      | Review of the table                                  |
 
-**Core increment:** 6.2 and 6.4 together. Each is one focused change.
+**Core increment:** 5.2 and 5.4 together. Each is one focused change.
 
 **Stretch:** Make the weeks locking test independent of today's date.
 
 **Evidence:** Red and green test runs for each side, the matrix, and the findings table, all in the PR.
 
 **Reflection:** What would a flaky end-to-end test hide that a focused unit test would show?
+
+## Week 6 — Safe schema migrations & zero-downtime data evolution
+
+**Outcome:** Write backward-compatible database migrations in Prisma without breaking active clients.
+
+**Prerequisites:** Week 5.
+
+**Entry points:** `prisma/schema.prisma`, `src/common/http-exception.filter.ts`, `src/common/errors.ts`.
+
+| Order | Small task                                                      | Observable behavior                       | Focused check        |
+| ----- | --------------------------------------------------------------- | ----------------------------------------- | -------------------- |
+| 6.1   | Add nullable column to Prisma schema and write expand migration | Safe non-breaking column addition         | `yarn prisma:deploy` |
+| 6.2   | Implement dual-write in service layer for safe data migration   | Writes populate old and new columns       | Service unit test    |
+| 6.3   | Trigger one `AppError` and confirm envelope shape               | `{ error: { code, message, requestId } }` | One HTTP test        |
+
+**Core increment:** 6.1 and 6.2.
+
+**Stretch:** Propose a zero-downtime column rename strategy without database lock.
+
+**Evidence:** Migration file and unit tests proving backward compatibility.
+
+**Reflection:** Why must you not delete a database column in the same PR that stops using it?
 
 ## Week 7 — Performance
 
