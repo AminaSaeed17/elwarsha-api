@@ -1468,7 +1468,7 @@ Role and label queries pass, which shows that controls have accessible roles and
       {
         layer: "PostgreSQL & Prisma",
         details:
-          "Upserting Submission and GithubPullRequest snapshot records per repository track without schema leaks (schema.prisma).",
+          "Upserting Submission and GithubPullRequest snapshot records per repository without schema leaks (schema.prisma).",
       },
       {
         layer: "GitHub",
@@ -1492,7 +1492,7 @@ Role and label queries pass, which shows that controls have accessible roles and
 | API | \`src/modules/github/http-github.client.ts\` | **Does not exist** | Real GitHub REST client using native \`fetch\` |
 | API | \`src/modules/github/fake-github.client.ts\` | Fake client with dynamic mock PRs | Integrated with runtime client module provider |
 | API | \`src/modules/submissions/\` | **Does not exist** | Module, Service, Controller, and Repository |
-| API | \`prisma/schema.prisma\` | \`ProductRepository\`, \`Submission\` (track), & \`GithubPullRequest\` | Business service to reconcile multi-repo snapshots |
+| API | \`prisma/schema.prisma\` | \`ProductRepository\`, \`Submission\`, & \`GithubPullRequest\` | Business service to reconcile multi-repo snapshots |
 | Web | \`src/features/tasks/\` | Tasks list and labels filter | Multi-repo PR submission status card and sync hook |
 
 #### 1. Title Convention & Matcher (\`elwarsha-api\`)
@@ -1532,11 +1532,10 @@ Create \`src/modules/submissions/\`:
     - If a matching PR is merged on GitHub: status is \`merged\`.
     - If a matching PR is open on GitHub: status is \`in_review\`.
     - If **no** matching PR is found on GitHub: status is \`draft\` with \`prUrl: null\` and \`pullRequest: null\` (do not fall back to stale cached records from other PRs).
-  - Upserts \`Submission\` and \`GithubPullRequest\` snapshot in Prisma for each track.
+  - Upserts \`Submission\` and \`GithubPullRequest\` snapshot in Prisma for each repository.
   - Returns the list of repository submission items.
 - **SubmissionsController**:
   - Exposes \`GET /api/v1/cohorts/:slug/assignments/:weekNumber/submissions\` returning \`AssignmentSubmissionsResponse\` (\`{ assignmentId, weekNumber, submissions: RepositorySubmissionItem[] }\`).
-  - Exposes \`GET /api/v1/cohorts/:slug/assignments/:weekNumber/submission?track=:track\` for single-track queries.
   - Protected by \`AuthGuard\` and \`CohortMembershipGuard\`.
 
 #### 4. Frontend Progress Section (\`elwarsha-web\`)
@@ -1546,7 +1545,7 @@ When landing on the week page, automatically call the submissions endpoint and d
 - **State & Caching Hook (\`useSubmission.ts\`):** Build the custom hook \`useAssignmentSubmissions\` with TanStack Query configured with \`staleTime: 60_000\` so navigation doesn't hammer GitHub rate limits, and expose \`refetch\` for on-demand synchronization.
 - **Progress Section & Status Card (\`SubmissionStatusCard.tsx\`):**
   - Displays a dedicated sub-section for each repository in the product list:
-    - Repository name (linked to GitHub repo) and Track badge (\`Backend\` / \`Frontend\`).
+    - Repository name (linked to GitHub repo).
     - Live status badge (\`Draft\`, \`● In Review\`, \`✓ Merged\`).
     - **Draft State:** Displays instructions to open a PR on GitHub titled \`[week-06] <description>\`, with reassurance of automatic runtime sync upon page load.
     - **In Review State:** Displays PR state badge (\`● In Review\`), PR number (\`#42\`), and external link to GitHub (\`target="_blank"\`, \`rel="noreferrer noopener"\`).

@@ -15,7 +15,7 @@ export class CatalogRepository {
 
     return records.map((record) => {
       const repos = record.repositories.map((r) => ({
-        track: r.track,
+        id: r.id,
         githubOwner: r.githubOwner,
         githubRepo: r.githubRepo,
       }));
@@ -41,7 +41,7 @@ export class CatalogRepository {
 
     return records.map((record) => {
       const repos = record.product.repositories.map((r) => ({
-        track: r.track,
+        id: r.id,
         githubOwner: r.githubOwner,
         githubRepo: r.githubRepo,
       }));

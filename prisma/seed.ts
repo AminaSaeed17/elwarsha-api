@@ -25,12 +25,10 @@ async function main(): Promise<void> {
     },
     update: {
       productId: product.id,
-      track: "backend",
       installationId: 1,
     },
     create: {
       productId: product.id,
-      track: "backend",
       githubOwner: "El-warsha",
       githubRepo: "elwarsha-api",
       installationId: 1,
@@ -46,12 +44,10 @@ async function main(): Promise<void> {
     },
     update: {
       productId: product.id,
-      track: "frontend",
       installationId: 1,
     },
     create: {
       productId: product.id,
-      track: "frontend",
       githubOwner: "El-warsha",
       githubRepo: "elwarsha-web",
       installationId: 1,

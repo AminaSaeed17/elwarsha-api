@@ -1465,7 +1465,7 @@ export const curriculumAr: Record<number, CurriculumWeek> = {
 | الـ API | \`src/modules/github/http-github.client.ts\` | **غير موجود** | عميل GitHub REST الفعلي باستخدام دالة \`fetch\` الأصلية |
 | الـ API | \`src/modules/github/fake-github.client.ts\` | عميل وهمي مع دعم ديناميكي للمؤلف | ربطه بمزود عميل GitHub وقت التشغيل |
 | الـ API | \`src/modules/submissions/\` | **غير موجود** | الوحدة (Module) والخدمة والمتحكم والمستودع |
-| الـ API | \`prisma/schema.prisma\` | \`ProductRepository\` و \`Submission\` (track) و \`GithubPullRequest\` | خدمة منطق العمل لمزامنة لقطات المستودعات المتعددة |
+| الـ API | \`prisma/schema.prisma\` | \`ProductRepository\` و \`Submission\` و \`GithubPullRequest\` | خدمة منطق العمل لمزامنة لقطات المستودعات المتعددة |
 | الواجهة | \`src/features/tasks/\` | قائمة المهام وفلترة الوسوم | بطاقة حالة التسليم متعددة المستودعات وخطاف المزامنة |
 
 #### ١. اتفاقية العنوان والمطابق النمطي (\`elwarsha-api\`)
@@ -1505,11 +1505,10 @@ export const curriculumAr: Record<number, CurriculumWeek> = {
     - إذا كان الـ PR مدموجاً بالفعل في GitHub: الحالة \`merged\`.
     - إذا كان الـ PR مفتوحاً على GitHub: الحالة \`in_review\`.
     - إذا **لم** يوجد طلب دمج مطابق في GitHub: الحالة \`draft\` مع \`prUrl: null\` و \`pullRequest: null\` (ولا يتم الاعتماد على لقطات قديمة منسوخة من طلبات أخرى).
-  - تحدّث أو تنشئ لقطة السجل في \`Submission\` و \`GithubPullRequest\` داخل Prisma لكل مسار.
+  - تحدّث أو تنشئ لقطة السجل في \`Submission\` و \`GithubPullRequest\` داخل Prisma لكل مستودع.
   - ترجع مصفوفة تسليمات المستودعات.
 - **SubmissionsController**:
   - يعرض المسار \`GET /api/v1/cohorts/:slug/assignments/:weekNumber/submissions\` الذي يرجع \`AssignmentSubmissionsResponse\` (\`{ assignmentId, weekNumber, submissions: RepositorySubmissionItem[] }\`).
-  - يعرض المسار \`GET /api/v1/cohorts/:slug/assignments/:weekNumber/submission?track=:track\` لاستعلام مسار مفرد.
   - محمي بواسطة \`AuthGuard\` و \`CohortMembershipGuard\`.
 
 #### ٤. بناء قسم تتبع التقدم والتسليمات في الواجهة الأمامية (\`elwarsha-web\`)
@@ -1519,7 +1518,7 @@ export const curriculumAr: Record<number, CurriculumWeek> = {
 - **خطاف إدارة الحالة والتخزين المؤقت (\`useSubmission.ts\`):** بناء الخطاف \`useAssignmentSubmissions\` بالاعتماد على TanStack Query مع ضبط مدة الـ SWR بـ دقيقة (\`staleTime: 60_000\`) لحماية واجهة برمجة تطبيقات GitHub من استنزاف معدل الطلبات، وإتاحة \`refetch\` لإعادة المزامنة عند الطلب.
 - **مكوّن وبطاقة حالة التقدم والتسليم (\`SubmissionStatusCard.tsx\`):**
   - يعرض قسماً فرعياً لكل مستودع من مستودعات المنتج:
-    - اسم المستودع (كرابط إلى GitHub) وشارة المسار (\`Backend\` / \`Frontend\`).
+    - اسم المستودع (كرابط إلى GitHub).
     - شارة الحالة الحية (\`مسودة\`، \`● قيد المراجعة\`، \`✓ تم الدمج\`).
     - **حالة المسودة (Draft):** إرشادات واضحة لفتح طلب دمج يبدأ بـ \`[week-06] <الوصف>\` مع طمأنة المتدرب بأن المزامنة ستلتقط الـ PR تلقائياً فور فتحه.
     - **حالة قيد المراجعة (In Review):** شارة الحالة المفتوحة (\`● قيد المراجعة\`)، ورقم الـ PR (مثل \`#42\`)، ورابط خارجي موثوق إلى GitHub (\`target="_blank"\`، \`rel="noreferrer noopener"\`).

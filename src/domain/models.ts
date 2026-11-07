@@ -23,7 +23,7 @@ export type Membership = {
 };
 
 export type ProductRepositoryInfo = {
-  track: string;
+  id?: string;
   githubOwner: string;
   githubRepo: string;
 };
@@ -64,7 +64,7 @@ export type Submission = {
   id: string;
   assignmentId: string;
   authorUserId: string;
-  track: string;
+  productRepositoryId?: string | null;
   status: "draft" | "submitted" | "in_review" | "eligible" | "merged" | "withdrawn";
   prUrl: string | null;
   pullRequest: {
