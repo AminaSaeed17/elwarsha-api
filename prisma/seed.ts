@@ -5,18 +5,56 @@ const prisma = new PrismaClient();
 async function main(): Promise<void> {
   const product = await prisma.product.upsert({
     where: { slug: "elwarsha-web" },
-    update: {},
+    update: {
+      name: "ElWarsha Web",
+      status: "active",
+    },
     create: {
       slug: "elwarsha-web",
       name: "ElWarsha Web",
       status: "active",
-      repository: {
-        create: {
-          githubOwner: "elwarsha",
-          githubRepo: "elwarsha-web",
-          installationId: 1,
-        },
+    },
+  });
+
+  await prisma.productRepository.upsert({
+    where: {
+      githubOwner_githubRepo: {
+        githubOwner: "El-warsha",
+        githubRepo: "elwarsha-api",
       },
+    },
+    update: {
+      productId: product.id,
+      track: "backend",
+      installationId: 1,
+    },
+    create: {
+      productId: product.id,
+      track: "backend",
+      githubOwner: "El-warsha",
+      githubRepo: "elwarsha-api",
+      installationId: 1,
+    },
+  });
+
+  await prisma.productRepository.upsert({
+    where: {
+      githubOwner_githubRepo: {
+        githubOwner: "El-warsha",
+        githubRepo: "elwarsha-web",
+      },
+    },
+    update: {
+      productId: product.id,
+      track: "frontend",
+      installationId: 1,
+    },
+    create: {
+      productId: product.id,
+      track: "frontend",
+      githubOwner: "El-warsha",
+      githubRepo: "elwarsha-web",
+      installationId: 1,
     },
   });
 
@@ -24,13 +62,13 @@ async function main(): Promise<void> {
     where: { slug: "cohort-01" },
     update: {
       nameAr: "الدفعة الأولى",
-      currentWeekNumber: 5,
+      currentWeekNumber: 6,
     },
     create: {
       slug: "cohort-01",
       name: "Cohort 01",
       nameAr: "الدفعة الأولى",
-      currentWeekNumber: 5,
+      currentWeekNumber: 6,
       startsOn: new Date("2026-10-01"),
       endsOn: new Date("2026-11-26"),
     },
@@ -117,9 +155,9 @@ async function main(): Promise<void> {
     },
     {
       weekNumber: 6,
-      title: "Safe schema migrations & zero-downtime data evolution",
-      status: "draft" as const,
-      labels: ["database", "backend"],
+      title: "GitHub integration: pull request synchronization and status tracking",
+      status: "published" as const,
+      labels: ["github", "backend", "frontend"],
     },
     {
       weekNumber: 7,

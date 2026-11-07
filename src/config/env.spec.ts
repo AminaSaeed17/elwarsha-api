@@ -14,6 +14,8 @@ describe("loadEnv", () => {
     const env = loadEnv(valid);
     expect(env.PORT).toBe(3001);
     expect(env.IDENTITY_PROVIDER).toBe("fake");
+    expect(env.GITHUB_CLIENT_ADAPTER).toBe("http");
+    expect(env.GITHUB_TOKEN).toBe("");
   });
 
   it("rejects missing required fields", () => {

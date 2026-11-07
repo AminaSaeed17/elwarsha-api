@@ -134,13 +134,14 @@ model Product {
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 
-  repository  ProductRepository?
-  engagements CohortProductEngagement[]
+  repositories ProductRepository[]
+  engagements  CohortProductEngagement[]
 }
 
 model ProductRepository {
   id             String @id @default(uuid()) @db.Uuid
-  productId      String @unique @db.Uuid
+  productId      String @db.Uuid
+  track          String @default("backend")
   githubOwner    String
   githubRepo     String
   installationId BigInt
@@ -148,6 +149,7 @@ model ProductRepository {
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([githubOwner, githubRepo])
+  @@unique([productId, track])
 }
 
 model Cohort {
@@ -231,6 +233,7 @@ model Submission {
   id           String           @id @default(uuid()) @db.Uuid
   assignmentId String           @db.Uuid
   authorUserId String           @db.Uuid
+  track        String           @default("backend")
   status       SubmissionStatus @default(draft)
   prUrl        String?
   createdAt    DateTime         @default(now())
@@ -240,7 +243,7 @@ model Submission {
   author      User              @relation(fields: [authorUserId], references: [id], onDelete: Cascade)
   pullRequest GithubPullRequest?
 
-  @@unique([assignmentId, authorUserId])
+  @@unique([assignmentId, authorUserId, track])
 }
 
 model GithubPullRequest {

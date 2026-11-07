@@ -24,6 +24,8 @@ const envSchema = z.object({
   GITHUB_WEBHOOK_SECRET: z.string().min(8),
   GITHUB_APP_CLIENT_ID: z.string().optional().default(""),
   GITHUB_APP_CLIENT_SECRET: z.string().optional().default(""),
+  GITHUB_TOKEN: z.string().optional().default(""),
+  GITHUB_CLIENT_ADAPTER: z.enum(["http", "fake"]).default("http"),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;
