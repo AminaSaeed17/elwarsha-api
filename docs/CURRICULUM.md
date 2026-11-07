@@ -152,13 +152,13 @@ elwarsha-web: `src/features/apply/CohortApplicationForm.test.tsx`, `e2e/`.
 
 **Entry points:** `src/modules/github/`, `src/modules/submissions/`, `prisma/schema.prisma`, ADR 0005. In `elwarsha-web`: `src/features/tasks/`, `src/features/weeks/WeekDetailPage.tsx`.
 
-| Order | Small task                                                               | Observable behavior                                                 | Focused check                                      |
-| ----- | ------------------------------------------------------------------------ | ------------------------------------------------------------------- | -------------------------------------------------- |
-| 6.1   | Implement regex PR title matcher (`/^\[week-0?(\d+)\]/i`)                | Accurately extracts target week from PR titles                      | `yarn test src/modules/github/github-matcher`      |
-| 6.2   | Implement `HttpGithubAppClient` against GitHub REST API with fetch       | Queries public pulls endpoint and returns normalized PR summaries   | `yarn test src/modules/github`                     |
-| 6.3   | Build `SubmissionsService` runtime sync and relational snapshot upsert   | Matches student `githubUserId` to PR and updates `Submission` in DB | `yarn test src/modules/submissions`                |
-| 6.4   | Expose `GET /api/v1/cohorts/:slug/assignments/:week/submission` endpoint | Authenticated member receives submission contract                   | `yarn test test/app.e2e-spec.ts`                   |
-| 6.5   | Build frontend submission section at top of week and tasks pages         | UI displays live PR status (Draft / In Review / Merged) & sync btn  | `yarn test src/features/tasks` (in `elwarsha-web`) |
+| Order | Small task                                                                 | Observable behavior                                                    | Focused check                                      |
+| ----- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------- |
+| 6.1   | Implement regex PR title matcher (`/^\[week-0?(\d+)\]/i`)                  | Accurately extracts target week from PR titles                         | `yarn test src/modules/github/github-matcher`      |
+| 6.2   | Implement `HttpGithubAppClient` against GitHub REST API with fetch         | Queries public pulls endpoint and returns normalized PR summaries      | `yarn test src/modules/github`                     |
+| 6.3   | Build `SubmissionsService` multi-repo runtime sync and relational snapshot | Matches student `githubUserId` across all product repos and updates DB | `yarn test src/modules/submissions`                |
+| 6.4   | Expose `GET /api/v1/cohorts/:slug/assignments/:week/submissions` endpoint  | Authenticated member receives multi-repo submissions contract          | `yarn test test/app.e2e-spec.ts`                   |
+| 6.5   | Build frontend multi-repo submission section on week and tasks pages       | UI displays each repo's live PR status and manual refresh btn          | `yarn test src/features/tasks` (in `elwarsha-web`) |
 
 **Core increment:** 6.1, 6.2, and 6.3 on API; 6.5 on Web.
 

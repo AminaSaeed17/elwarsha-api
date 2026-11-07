@@ -1440,12 +1440,14 @@ Role and label queries pass, which shows that controls have accessible roles and
       "Query the GitHub REST API using authenticated GitHub App credentials.",
       "Implement deterministic pattern matching for pull request titles (`[week-06]`).",
       "Extract and verify student identity across external GitHub IDs and platform user accounts.",
-      "Evaluate pull request state (open, merged) synchronously on page load.",
+      "Evaluate pull request state (open, merged, or draft) synchronously on page load.",
+      "Reconcile pull requests across all product repositories (`elwarsha-api`, `elwarsha-web`) in parallel.",
       "Persist relational snapshots in PostgreSQL without leaking third-party SDK types into application layers.",
-      "Build an accessible status component in React that displays live pull request evidence.",
+      "Build an accessible status component in React that displays live multi-repository pull request progress.",
     ],
     coreConcepts: [
       "Push (Webhooks) vs Pull (Runtime Reconciliation)",
+      "Multi-Repository Product Submissions",
       "Authoritative Source of Truth (ADR 0005)",
       "Deterministic Title Pattern Matching",
       "OAuth & GitHub App Token Authentication",
@@ -1456,17 +1458,17 @@ Role and label queries pass, which shows that controls have accessible roles and
       {
         layer: "React",
         details:
-          'Data hook (`useSubmission`), live PR badge card (`SubmissionStatusCard`), accessible status announcement (`aria-live="polite"`), cached with TanStack Query (elwarsha-web).',
+          'Data hook (`useAssignmentSubmissions`), live multi-repo PR card (`SubmissionStatusCard`), accessible status announcement (`aria-live="polite"`), cached with TanStack Query (elwarsha-web).',
       },
       {
         layer: "NestJS",
         details:
-          "SubmissionsModule, GithubAppClient port/adapter, regex title matcher, GET /api/v1/cohorts/:slug/assignments/:week/submission endpoint gated by AuthGuard & CohortMembershipGuard (elwarsha-api).",
+          "SubmissionsModule, GithubAppClient port/adapter, regex title matcher, GET /api/v1/cohorts/:slug/assignments/:week/submissions multi-repo endpoint gated by AuthGuard & CohortMembershipGuard (elwarsha-api).",
       },
       {
         layer: "PostgreSQL & Prisma",
         details:
-          "Upserting Submission and GithubPullRequest snapshot records without schema leaks (schema.prisma).",
+          "Upserting Submission and GithubPullRequest snapshot records per repository track without schema leaks (schema.prisma).",
       },
       {
         layer: "GitHub",
@@ -1477,7 +1479,7 @@ Role and label queries pass, which shows that controls have accessible roles and
     assignment: {
       title: "Build the Runtime GitHub Submission Tracker",
       summary:
-        "Implement regex title matching, extend the GitHub App client, build the Submissions module to synchronize PR snapshots on page load, and display live PR status cards in the portal.",
+        "Implement regex title matching, extend the GitHub App client, build the Submissions module to synchronize PR snapshots across all product repositories on page load, and display live multi-repo PR status cards in the portal.",
       detailsMd: `### Week 6 Assignment: Runtime GitHub Submission Tracker
 
 **Deliverable:** One focused PR to \`elwarsha-api\` and one to \`elwarsha-web\`.
@@ -1488,10 +1490,10 @@ Role and label queries pass, which shows that controls have accessible roles and
 | --- | --- | --- | --- |
 | API | \`src/modules/github/github.ports.ts\` | \`GithubAppClient\` port with \`getPullRequest\` | \`listRepositoryPullRequests\` method |
 | API | \`src/modules/github/http-github.client.ts\` | **Does not exist** | Real GitHub REST client using native \`fetch\` |
-| API | \`src/modules/github/fake-github.client.ts\` | Fake client returning single PR | Dynamic mock supporting multiple PRs |
+| API | \`src/modules/github/fake-github.client.ts\` | Fake client with dynamic mock PRs | Integrated with runtime client module provider |
 | API | \`src/modules/submissions/\` | **Does not exist** | Module, Service, Controller, and Repository |
-| API | \`prisma/schema.prisma\` | \`Submission\` & \`GithubPullRequest\` models | Business service to upsert snapshots |
-| Web | \`src/features/tasks/\` | Tasks list and labels filter | PR submission status card and sync hook |
+| API | \`prisma/schema.prisma\` | \`ProductRepository\`, \`Submission\` (track), & \`GithubPullRequest\` | Business service to reconcile multi-repo snapshots |
+| Web | \`src/features/tasks/\` | Tasks list and labels filter | Multi-repo PR submission status card and sync hook |
 
 #### 1. Title Convention & Matcher (\`elwarsha-api\`)
 
@@ -1508,54 +1510,62 @@ In \`src/modules/github/\`:
   - Uses Node native \`fetch\` to query \`https://api.github.com/repos/:owner/:repo/pulls?state=all&per_page=100\`.
   - Sets required headers: \`Accept: application/vnd.github+json\`, \`User-Agent: ElWarsha-App\`, and optional \`Authorization: Bearer <GITHUB_TOKEN>\`.
   - Normalizes pull request items into \`NormalizedPullRequestSummary\` (normalizing state to \`merged\` when \`merged_at\` is non-null).
-- Update \`FakeGithubAppClient\` with fixture data including:
-  - Open PR matching \`[week-06]\` for participant (\`githubUserId: 1001\`).
+- Update \`FakeGithubAppClient\` with dynamic author support (\`this.env.FAKE_USER_GITHUB_ID || "1001"\`) and fixture data including:
+  - Open PR matching \`[week-06]\` for participant.
   - Merged PR for Week 1.
   - Another student's PR.
 - Unit test \`http-github.client.spec.ts\` by mocking \`globalThis.fetch\` to verify headers, token injection, normalization, and rate-limit handling.
-- Ensure unit and e2e tests can execute deterministically with PostgreSQL running locally without hitting live GitHub (using \`FakeGithubAppClient\` when \`NODE_ENV=test\` or \`GITHUB_CLIENT_ADAPTER=fake\`).
+- Ensure unit and e2e tests execute deterministically with PostgreSQL running locally without hitting live GitHub (using \`FakeGithubAppClient\` when \`NODE_ENV=test\` or \`GITHUB_CLIENT_ADAPTER=fake\`).
 
-#### 3. Submissions Module & Sync Service
+#### 3. Submissions Module & Multi-Repo Sync Service
+
+In El-Warsha, each Product has multiple repositories (e.g. \`El-warsha/elwarsha-api\` for backend and \`El-warsha/elwarsha-web\` for frontend). Students open PRs in each repository where they contribute.
 
 Create \`src/modules/submissions/\`:
 - **SubmissionsService**:
-  - Resolves participant's \`githubUserId\` from \`ExternalIdentity\`. (Tip: In local development with fake identity, configure \`FAKE_USER_GITHUB_ID=<your-numeric-id>\` in \`.env\` to match your real GitHub user ID, which you can find via \`https://api.github.com/users/<username>\`).
-  - Queries GitHub PRs for the repository via \`GithubAppClient\`.
-  - Finds the PR where \`BigInt(pr.user.id) === identity.githubUserId\` and title matches \`[week-XX]\`.
-  - Evaluates status:
-    - \`merged\`: PR merged on GitHub.
-    - \`in_review\`: PR open on GitHub.
-    - \`draft\`: no PR found.
-  - Upserts \`Submission\` and \`GithubPullRequest\` snapshot in Prisma.
+  - Resolves participant's \`githubUserId\` from \`ExternalIdentity\`.
+    > **Tip:** In local development with fake identity, set \`FAKE_USER_GITHUB_ID=<your-numeric-id>\` in \`.env\` to match your real GitHub user ID, which you can find via \`https://api.github.com/users/<username>\`.
+  - Iterates over all repositories configured for the engagement's product (\`engagement.product.repositories\`).
+  - For each repository, queries GitHub PRs via \`GithubAppClient.listRepositoryPullRequests(githubOwner, githubRepo)\`.
+  - Finds the PR where \`BigInt(pr.authorGithubUserId) === identity.githubUserId\` and title matches \`[week-XX]\`.
+  - **Reconciliation Rules:**
+    - If a matching PR is merged on GitHub: status is \`merged\`.
+    - If a matching PR is open on GitHub: status is \`in_review\`.
+    - If **no** matching PR is found on GitHub: status is \`draft\` with \`prUrl: null\` and \`pullRequest: null\` (do not fall back to stale cached records from other PRs).
+  - Upserts \`Submission\` and \`GithubPullRequest\` snapshot in Prisma for each track.
+  - Returns the list of repository submission items.
 - **SubmissionsController**:
-  - Exposes \`GET /api/v1/cohorts/:slug/assignments/:weekNumber/submission\`.
+  - Exposes \`GET /api/v1/cohorts/:slug/assignments/:weekNumber/submissions\` returning \`AssignmentSubmissionsResponse\` (\`{ assignmentId, weekNumber, submissions: RepositorySubmissionItem[] }\`).
+  - Exposes \`GET /api/v1/cohorts/:slug/assignments/:weekNumber/submission?track=:track\` for single-track queries.
   - Protected by \`AuthGuard\` and \`CohortMembershipGuard\`.
-  - Returns current submission status and PR metadata.
 
 #### 4. Frontend Progress Section (\`elwarsha-web\`)
 
-When landing on the week page, automatically call the submission endpoint and display a live progress section at the very top:
-- **Contract & API Client (\`@core/api\`):** Re-export updated submission response contracts (\`AssignmentSubmissionResponse\`, \`SubmissionStatus\`) and connect \`api.getAssignmentSubmission(cohortSlug, weekNumber, { track })\`.
-- **State & Caching Hook (\`useSubmission.ts\`):** Build the custom hook with TanStack Query configured with \`staleTime: 60_000\` so navigation doesn't hammer GitHub rate limits, and expose \`refetch\` for on-demand synchronization.
+When landing on the week page, automatically call the submissions endpoint and display a live multi-repository progress section at the very top:
+- **Contract & API Client (\`@core/api\`):** Re-export updated submission response contracts (\`AssignmentSubmissionsResponse\`, \`RepositorySubmissionItem\`, \`SubmissionStatus\`) and connect \`api.getAssignmentSubmissions(cohortSlug, weekNumber)\`.
+- **State & Caching Hook (\`useSubmission.ts\`):** Build the custom hook \`useAssignmentSubmissions\` with TanStack Query configured with \`staleTime: 60_000\` so navigation doesn't hammer GitHub rate limits, and expose \`refetch\` for on-demand synchronization.
 - **Progress Section & Status Card (\`SubmissionStatusCard.tsx\`):**
-  - **Draft State:** Displays instructions to open a PR on GitHub titled \`[week-06] <description>\`, with reassurance of automatic runtime sync upon page load.
-  - **In Review State:** Displays PR state badge (\`● In Review\`), PR number (\`#42\`), and external link to GitHub (\`target="_blank"\`, \`rel="noreferrer noopener"\`).
-  - **Merged State:** Displays completion badge (\`✓ Merged\`) confirming the assignment has been completed and merged into main.
-  - **Interactive Sync:** Include a manual "↻ Refresh from GitHub" button that triggers \`refetch()\` immediately.
+  - Displays a dedicated sub-section for each repository in the product list:
+    - Repository name (linked to GitHub repo) and Track badge (\`Backend\` / \`Frontend\`).
+    - Live status badge (\`Draft\`, \`● In Review\`, \`✓ Merged\`).
+    - **Draft State:** Displays instructions to open a PR on GitHub titled \`[week-06] <description>\`, with reassurance of automatic runtime sync upon page load.
+    - **In Review State:** Displays PR state badge (\`● In Review\`), PR number (\`#42\`), and external link to GitHub (\`target="_blank"\`, \`rel="noreferrer noopener"\`).
+    - **Merged State:** Displays completion badge (\`✓ Merged\`) confirming the assignment PR has been merged into main.
+  - **Interactive Sync:** Include a global "↻ Refresh from GitHub" button in the card header that triggers \`refetch()\` immediately.
   - **Accessibility:** Uses \`role="region"\`, \`aria-live="polite"\`, and explicit accessible link labels for screen readers.
-- **Page Integration (\`WeekDetailPage.tsx\` & \`TasksPage.tsx\`):** Mount the progress section at the **very top of the week page** (above the fold, right below the week header) and on the task page so students immediately see their current submission progress upon landing.
-- **Component Tests (\`SubmissionStatusCard.test.tsx\`):** Write React Testing Library tests covering loading, draft, open PR, and merged PR states along with the manual refresh action.
+- **Page Integration (\`WeekDetailPage.tsx\` & \`TasksPage.tsx\`):** Mount the progress section at the **very top of the week page** (above the fold, right below the week header) and on the task page so students immediately see their multi-repo progress upon landing.
+- **Component Tests (\`SubmissionStatusCard.test.tsx\`):** Write React Testing Library tests covering loading, draft, open PR, merged PR states, multi-repo list rendering, and the manual refresh action.
 
 ---
 
 #### Acceptance criteria
 
 - [ ] Matcher unit tests cover all casing and padding variations.
-- [ ] \`SubmissionsService\` evaluates PR existence and state accurately.
-- [ ] Endpoint is protected: returns 401 without session and 403 for non-members.
+- [ ] \`SubmissionsService\` evaluates PR existence and state accurately across all product repositories.
+- [ ] Submissions endpoint is protected: returns 401 without session and 403 for non-members.
 - [ ] Database stores synchronized PR snapshots without leaking \`@prisma/client\` outside infrastructure.
-- [ ] Frontend implements the submission section end-to-end at the very start of the task page.
-- [ ] Frontend displays clean status transitions (Draft -> In Review -> Merged) and supports manual refresh.
+- [ ] Frontend implements the multi-repo submission section end-to-end at the very start of the week and task pages.
+- [ ] Frontend displays clean status transitions (Draft -> In Review -> Merged) for each repository and supports manual refresh.
 - [ ] \`yarn validate\` passes with zero type errors.
 
 #### Advanced track (optional)

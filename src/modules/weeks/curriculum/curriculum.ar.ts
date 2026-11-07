@@ -1420,6 +1420,7 @@ export const curriculumAr: Record<number, CurriculumWeek> = {
     ],
     coreConcepts: [
       "الدفع (Webhooks) مقابل السحب وقت التشغيل (Runtime Reconciliation)",
+      "تسليمات المنتجات متعددة المستودعات (Multi-Repository Submissions)",
       "المصدر الموثوق الوحيد للحقيقة (ADR 0005)",
       "المطابقة الحتمية للعناوين عبر Regex",
       "المصادقة عبر OAuth ورموز تطبيقات GitHub",
@@ -1430,17 +1431,17 @@ export const curriculumAr: Record<number, CurriculumWeek> = {
       {
         layer: "React",
         details:
-          'خطاف بيانات (`useSubmission`)، وبطاقة حالة طلب الدمج (`SubmissionStatusCard`)، وتنبيهات سهولة الوصول (`aria-live="polite"`)، مع التخزين المؤقت عبر TanStack Query (elwarsha-web).',
+          'خطاف بيانات (`useAssignmentSubmissions`)، وبطاقة حالة التسليم متعددة المستودعات (`SubmissionStatusCard`)، وتنبيهات سهولة الوصول (`aria-live="polite"`)، مع التخزين المؤقت عبر TanStack Query (elwarsha-web).',
       },
       {
         layer: "NestJS",
         details:
-          "وحدة SubmissionsModule، ومنفذ ومحوّل GithubAppClient، ومطابق العناوين النمطي، ونقطة النهاية GET /api/v1/cohorts/:slug/assignments/:week/submission المحمية بـ AuthGuard و CohortMembershipGuard (elwarsha-api).",
+          "وحدة SubmissionsModule، ومنفذ ومحوّل GithubAppClient، ومطابق العناوين النمطي، ونقطة النهاية متعددة المستودعات GET /api/v1/cohorts/:slug/assignments/:week/submissions المحمية بـ AuthGuard و CohortMembershipGuard (elwarsha-api).",
       },
       {
         layer: "PostgreSQL و Prisma",
         details:
-          "تحديث وحفظ لقطات الجداول Submission و GithubPullRequest دون تسريب تفاصيل المخطط (schema.prisma).",
+          "تحديث وحفظ لقطات الجداول Submission و GithubPullRequest لكل مسار مستودع دون تسريب تفاصيل المخطط (schema.prisma).",
       },
       {
         layer: "GitHub",
@@ -1449,9 +1450,9 @@ export const curriculumAr: Record<number, CurriculumWeek> = {
       },
     ],
     assignment: {
-      title: "بناء متتبع تسليمات GitHub الفوري",
+      title: "بناء متتبع تسليمات GitHub الفوري متعدد المستودعات",
       summary:
-        "نفّذ مطابقة عناوين الـ PR عبر التعبيرات النمطية، وسّع عميل GitHub App، وابنِ وحدة Submissions لمزامنة لقطات طلبات الدمج عند تحميل الصفحة، واعرض بطاقة حالة التسليم الحية في بوابة المتدرب.",
+        "نفّذ مطابقة عناوين الـ PR عبر التعبيرات النمطية، وسّع عميل GitHub App، وابنِ وحدة Submissions لمزامنة لقطات طلبات الدمج عبر كافة مستودعات المنتج عند تحميل الصفحة، واعرض بطاقات حالة التسليم الحية في بوابة المتدرب.",
       detailsMd: `### مهمة الأسبوع السادس: متتبع تسليمات GitHub الفوري
 
 **المطلوب تسليمه:** طلب دمج (PR) مركّز لكل من \`elwarsha-api\` و \`elwarsha-web\`.
@@ -1462,10 +1463,10 @@ export const curriculumAr: Record<number, CurriculumWeek> = {
 | --- | --- | --- | --- |
 | الـ API | \`src/modules/github/github.ports.ts\` | واجهة \`GithubAppClient\` مع دالة \`getPullRequest\` | دالة \`listRepositoryPullRequests\` |
 | الـ API | \`src/modules/github/http-github.client.ts\` | **غير موجود** | عميل GitHub REST الفعلي باستخدام دالة \`fetch\` الأصلية |
-| الـ API | \`src/modules/github/fake-github.client.ts\` | عميل وهمي يرجع طلب دمج وحيد | بيانات وهمية ديناميكية تدعم طلبات متعددة |
+| الـ API | \`src/modules/github/fake-github.client.ts\` | عميل وهمي مع دعم ديناميكي للمؤلف | ربطه بمزود عميل GitHub وقت التشغيل |
 | الـ API | \`src/modules/submissions/\` | **غير موجود** | الوحدة (Module) والخدمة والمتحكم والمستودع |
-| الـ API | \`prisma/schema.prisma\` | نموذجا \`Submission\` و \`GithubPullRequest\` | خدمة منطق العمل لحفظ وتحديث اللقطات |
-| الواجهة | \`src/features/tasks/\` | قائمة المهام وفلترة الوسوم | بطاقة حالة طلب الدمج وخطاف المزامنة |
+| الـ API | \`prisma/schema.prisma\` | \`ProductRepository\` و \`Submission\` (track) و \`GithubPullRequest\` | خدمة منطق العمل لمزامنة لقطات المستودعات المتعددة |
+| الواجهة | \`src/features/tasks/\` | قائمة المهام وفلترة الوسوم | بطاقة حالة التسليم متعددة المستودعات وخطاف المزامنة |
 
 #### ١. اتفاقية العنوان والمطابق النمطي (\`elwarsha-api\`)
 
@@ -1482,54 +1483,62 @@ export const curriculumAr: Record<number, CurriculumWeek> = {
   - يستعلم من واجهة برمجة تطبيقات GitHub العامة عبر \`fetch\` الأصلية (\`https://api.github.com/repos/:owner/:repo/pulls?state=all&per_page=100\`).
   - يرفق الترويسات القياسية: \`Accept: application/vnd.github+json\`، و \`User-Agent: ElWarsha-App\`، وترويسة التوثيق الاختيارية \`Authorization: Bearer <GITHUB_TOKEN>\`.
   - يوحّد حقول طلبات الدمج في بنية \`NormalizedPullRequestSummary\` (مع تحويل الحالة إلى \`merged\` عند وجود \`merged_at\`).
-- حدّث \`FakeGithubAppClient\` ببيانات وهمية تشمل:
-  - طلب دمج مفتوح يطابق \`[week-06]\` للمشارك (\`githubUserId: 1001\`).
+- حدّث \`FakeGithubAppClient\` بالاعتماد على معرف المؤلف الديناميكي (\`this.env.FAKE_USER_GITHUB_ID || "1001"\`) مع بيانات وهمية تشمل:
+  - طلب دمج مفتوح يطابق \`[week-06]\` للمشارك.
   - طلب دمج مدموج للأسبوع الأول.
   - طلب دمج لمشارك آخر.
 - اكتب اختبار وحدة \`http-github.client.spec.ts\` بمحاكاة \`globalThis.fetch\` لاختبار الترويسات وحقن التوكن وتوحيد البيانات ومعالجة حدود الطلبات.
 - تأكد أن اختبارات الوحدة واختبارات e2e تعمل بحتمية كاملة مع Postgres المحلي دون الحاجة للاتصال الفعلي بـ GitHub عند تشغيل الاختبارات.
 
-#### ٣. وحدة التسليمات وخدمة المزامنة
+#### ٣. وحدة التسليمات وخدمة المزامنة متعددة المستودعات
+
+في الورشة، لكل منتج عدة مستودعات (مثل \`El-warsha/elwarsha-api\` للخلفية و \`El-warsha/elwarsha-web\` للواجهة). ويفتح المتدرب طلب دمج في كل مستودع يشارك في تطويره.
 
 أنشئ المجلد \`src/modules/submissions/\`:
 - **SubmissionsService**:
-  - تجلب معرّف المتدرب \`githubUserId\` من \`ExternalIdentity\`. (ملاحظة: في البيئة المحلية مع نظام الهوية الوهمي، يمكنك ضبط \`FAKE_USER_GITHUB_ID=<معرفك-الرقمي>\` في \`.env\` لاختبار طلبات الدمج الحقيقية بحسابك، ويمكنك معرفة رقمك عبر \`https://api.github.com/users/<اسم-المستخدم>\`).
-  - تستعلم عن طلبات دمج المستودع عبر \`GithubAppClient\`.
-  - تبحث عن طلب الدمج الذي يتطابق فيه \`BigInt(pr.user.id) === identity.githubUserId\` ويبدأ عنوانه بـ \`[week-XX]\`.
-  - تقيّم الحالة:
-    - \`merged\`: إذا كان الـ PR مدموجاً بالفعل في GitHub.
-    - \`in_review\`: إذا كان الـ PR مفتوحاً على GitHub.
-    - \`draft\`: إذا لم يوجد طلب دمج مطابق بعد.
-  - تحدّث أو تنشئ لقطة السجل في \`Submission\` و \`GithubPullRequest\` داخل Prisma.
+  - تجلب معرّف المتدرب \`githubUserId\` من \`ExternalIdentity\`.
+    > **ملاحظة:** في البيئة المحلية مع نظام الهوية الوهمي، يمكنك ضبط \`FAKE_USER_GITHUB_ID=<معرفك-الرقمي>\` في \`.env\` لاختبار طلبات الدمج الحقيقية بحسابك، ويمكنك معرفة رقمك عبر \`https://api.github.com/users/<اسم-المستخدم>\`.
+  - تدور على كافة المستودعات المضبوطة لمنتج الدفعة (\`engagement.product.repositories\`).
+  - لكل مستودع، تستعلم عن طلبات الدمج عبر \`GithubAppClient.listRepositoryPullRequests(githubOwner, githubRepo)\`.
+  - تبحث عن طلب الدمج الذي يتطابق فيه \`BigInt(pr.authorGithubUserId) === identity.githubUserId\` ويبدأ عنوانه بـ \`[week-XX]\`.
+  - **قواعد المطابقة والتسوية الحتمية:**
+    - إذا كان الـ PR مدموجاً بالفعل في GitHub: الحالة \`merged\`.
+    - إذا كان الـ PR مفتوحاً على GitHub: الحالة \`in_review\`.
+    - إذا **لم** يوجد طلب دمج مطابق في GitHub: الحالة \`draft\` مع \`prUrl: null\` و \`pullRequest: null\` (ولا يتم الاعتماد على لقطات قديمة منسوخة من طلبات أخرى).
+  - تحدّث أو تنشئ لقطة السجل في \`Submission\` و \`GithubPullRequest\` داخل Prisma لكل مسار.
+  - ترجع مصفوفة تسليمات المستودعات.
 - **SubmissionsController**:
-  - يعرض المسار \`GET /api/v1/cohorts/:slug/assignments/:weekNumber/submission\`.
+  - يعرض المسار \`GET /api/v1/cohorts/:slug/assignments/:weekNumber/submissions\` الذي يرجع \`AssignmentSubmissionsResponse\` (\`{ assignmentId, weekNumber, submissions: RepositorySubmissionItem[] }\`).
+  - يعرض المسار \`GET /api/v1/cohorts/:slug/assignments/:weekNumber/submission?track=:track\` لاستعلام مسار مفرد.
   - محمي بواسطة \`AuthGuard\` و \`CohortMembershipGuard\`.
-  - يرجع حالة التسليم الحالية وبيانات طلب الدمج الوصفية.
 
 #### ٤. بناء قسم تتبع التقدم والتسليمات في الواجهة الأمامية (\`elwarsha-web\`)
 
-عند فتح صفحة الأسبوع أو صفحة المهام، استعلم تلقائياً من نقطة النهاية واعرض قسم متابعة التقدم في أعلى الصفحة مباشرة:
-- **طبقة العقود والعميل (\`@core/api\`):** استيراد أنواع بيانات التسليم وتحديثات العميل (\`AssignmentSubmissionResponse\`، \`SubmissionStatus\`) وربط استدعاء العميل \`api.getAssignmentSubmission(cohortSlug, weekNumber, { track })\`.
-- **خطاف إدارة الحالة والتخزين المؤقت (\`useSubmission.ts\`):** بناء الخطاف \`useSubmission\` بالاعتماد على TanStack Query مع ضبط مدة الـ SWR بـ دقيقة (\`staleTime: 60_000\`) لحماية واجهة برمجة تطبيقات GitHub من استنزاف معدل الطلبات، وإتاحة \`refetch\` لإعادة المزامنة عند الطلب.
+عند فتح صفحة الأسبوع أو صفحة المهام، استعلم تلقائياً من نقطة النهاية واعرض قسم متابعة التقدم متعدد المستودعات في أعلى الصفحة مباشرة:
+- **طبقة العقود والعميل (\`@core/api\`):** استيراد أنواع بيانات التسليم وتحديثات العميل (\`AssignmentSubmissionsResponse\`، \`RepositorySubmissionItem\`، \`SubmissionStatus\`) وربط استدعاء العميل \`api.getAssignmentSubmissions(cohortSlug, weekNumber)\`.
+- **خطاف إدارة الحالة والتخزين المؤقت (\`useSubmission.ts\`):** بناء الخطاف \`useAssignmentSubmissions\` بالاعتماد على TanStack Query مع ضبط مدة الـ SWR بـ دقيقة (\`staleTime: 60_000\`) لحماية واجهة برمجة تطبيقات GitHub من استنزاف معدل الطلبات، وإتاحة \`refetch\` لإعادة المزامنة عند الطلب.
 - **مكوّن وبطاقة حالة التقدم والتسليم (\`SubmissionStatusCard.tsx\`):**
-  - **حالة المسودة (Draft):** إرشادات واضحة لفتح طلب دمج يبدأ بـ \`[week-06] <الوصف>\` مع طمأنة المتدرب بأن المزامنة ستلتقط الـ PR تلقائياً فور فتحه.
-  - **حالة قيد المراجعة (In Review):** شارة الحالة المفتوحة (\`● قيد المراجعة\`)، ورقم الـ PR (مثل \`#42\`)، ورابط خارجي موثوق إلى GitHub (\`target="_blank"\`، \`rel="noreferrer noopener"\`).
-  - **حالة تم الدمج (Merged):** شارة إتمام التكليف بنجاح (\`✓ تم الدمج\`).
-  - **زر التحديث اليدوي الفوري:** زر "↻ تحديث من GitHub" يعيد الاستعلام فور ضغطه.
+  - يعرض قسماً فرعياً لكل مستودع من مستودعات المنتج:
+    - اسم المستودع (كرابط إلى GitHub) وشارة المسار (\`Backend\` / \`Frontend\`).
+    - شارة الحالة الحية (\`مسودة\`، \`● قيد المراجعة\`، \`✓ تم الدمج\`).
+    - **حالة المسودة (Draft):** إرشادات واضحة لفتح طلب دمج يبدأ بـ \`[week-06] <الوصف>\` مع طمأنة المتدرب بأن المزامنة ستلتقط الـ PR تلقائياً فور فتحه.
+    - **حالة قيد المراجعة (In Review):** شارة الحالة المفتوحة (\`● قيد المراجعة\`)، ورقم الـ PR (مثل \`#42\`)، ورابط خارجي موثوق إلى GitHub (\`target="_blank"\`، \`rel="noreferrer noopener"\`).
+    - **حالة تم الدمج (Merged):** شارة إتمام التكليف بنجاح (\`✓ تم الدمج\`).
+  - **زر التحديث اليدوي الفوري:** زر عام في ترويسة البطاقة "↻ تحديث من GitHub" يعيد الاستعلام فور ضغطه.
   - **سهولة الوصول (Accessibility):** استخدام \`role="region"\` و \`aria-live="polite"\` وتسميات وصول صريحة للروابط (\`aria-label\`).
 - **الدمج في صفحة الأسبوع وصفحة المهام (\`WeekDetailPage.tsx\` و \`TasksPage.tsx\`):** وضع قسم التسليم في **أول صفحة الأسبوع مباشرة** (أعلى الصفحة تحت الترويسة) وصفحة المهام ليظهر للمتدرب فور فتح الصفحة دون الحاجة للتمرير لأسفل.
-- **اختبارات المكوّن (\`SubmissionStatusCard.test.tsx\`):** تغطية الحالات الثلاث (مسودة مع الوسم، قيد المراجعة مع الرابط، مدموج) وزر التحديث اليدوي وسمات سهولة الوصول.
+- **اختبارات المكوّن (\`SubmissionStatusCard.test.tsx\`):** تغطية الحالات المختلفة، وعرض المستودعات المتعددة، وزر التحديث اليدوي وسمات سهولة الوصول.
 
 ---
 
 #### معايير القبول
 
 - [ ] اختبارات وحدة مطابق العناوين تغطي كافة حالات الأحرف والفواصل والأصفار البادئة.
-- [ ] \`SubmissionsService\` تحدد حالة الـ PR بدقة (draft، in_review، merged).
-- [ ] نقطة النهاية محمية: ترجع 401 بدون جلسة صالحة و 403 لمن ليس عضواً في الدفعة.
+- [ ] \`SubmissionsService\` تحدد حالة الـ PR بدقة عبر كافة مستودعات المنتج (draft، in_review، merged).
+- [ ] نقطة نهاية التسليمات محمية: ترجع 401 بدون جلسة صالحة و 403 لمن ليس عضواً في الدفعة.
 - [ ] قاعدة البيانات تحفظ لقطات الـ PR المزامنة دون تسريب أنواع \`@prisma/client\` خارج طبقة البنية التحتية.
-- [ ] الواجهة الأمامية تطبّق قسم التسليم بالكامل في أول صفحة التكليف مع دعم المزامنة اليدوية.
-- [ ] الواجهة الأمامية تعرض انتقالات الحالة بوضوح (مسودة -> قيد المراجعة -> تم الدمج).
+- [ ] الواجهة الأمامية تطبّق قسم التسليم متعدد المستودعات بالكامل في أول صفحة الأسبوع وصفحة المهام مع دعم المزامنة اليدوية.
+- [ ] الواجهة الأمامية تعرض انتقالات الحالة بوضوح لكل مستودع (مسودة -> قيد المراجعة -> تم الدمج).
 - [ ] أمر التحقق \`yarn validate\` ينجح بدون أي أخطاء أنواع.
 
 #### المسار المتقدم (اختياري)
