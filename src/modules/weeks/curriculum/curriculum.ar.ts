@@ -1493,7 +1493,7 @@ export const curriculumAr: Record<number, CurriculumWeek> = {
 
 أنشئ المجلد \`src/modules/submissions/\`:
 - **SubmissionsService**:
-  - تجلب معرّف المتدرب \`githubUserId\` من \`ExternalIdentity\`.
+  - تجلب معرّف المتدرب \`githubUserId\` من \`ExternalIdentity\`. (ملاحظة: في البيئة المحلية مع نظام الهوية الوهمي، يمكنك ضبط \`FAKE_USER_GITHUB_ID=<معرفك-الرقمي>\` في \`.env\` لاختبار طلبات الدمج الحقيقية بحسابك، ويمكنك معرفة رقمك عبر \`https://api.github.com/users/<اسم-المستخدم>\`).
   - تستعلم عن طلبات دمج المستودع عبر \`GithubAppClient\`.
   - تبحث عن طلب الدمج الذي يتطابق فيه \`BigInt(pr.user.id) === identity.githubUserId\` ويبدأ عنوانه بـ \`[week-XX]\`.
   - تقيّم الحالة:

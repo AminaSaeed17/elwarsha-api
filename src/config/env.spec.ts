@@ -16,6 +16,7 @@ describe("loadEnv", () => {
     expect(env.IDENTITY_PROVIDER).toBe("fake");
     expect(env.GITHUB_CLIENT_ADAPTER).toBe("http");
     expect(env.GITHUB_TOKEN).toBe("");
+    expect(env.FAKE_USER_GITHUB_ID).toBe("1001");
   });
 
   it("rejects missing required fields", () => {

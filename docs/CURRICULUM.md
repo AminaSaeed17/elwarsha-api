@@ -148,7 +148,7 @@ elwarsha-web: `src/features/apply/CohortApplicationForm.test.tsx`, `e2e/`.
 
 **Outcome:** Synchronize pull request existence and state (draft / in_review / merged) directly from the GitHub REST API at runtime using native fetch without webhooks or background queues.
 
-**Prerequisites:** Week 5. Docker Compose PostgreSQL running locally.
+**Prerequisites:** Week 5. Docker Compose PostgreSQL running locally. Set `FAKE_USER_GITHUB_ID=<your-github-id>` in `.env` to test live PRs with fake auth.
 
 **Entry points:** `src/modules/github/`, `src/modules/submissions/`, `prisma/schema.prisma`, ADR 0005. In `elwarsha-web`: `src/features/tasks/`, `src/features/weeks/WeekDetailPage.tsx`.
 

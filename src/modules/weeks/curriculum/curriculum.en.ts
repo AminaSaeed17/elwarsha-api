@@ -1519,7 +1519,7 @@ In \`src/modules/github/\`:
 
 Create \`src/modules/submissions/\`:
 - **SubmissionsService**:
-  - Resolves participant's \`githubUserId\` from \`ExternalIdentity\`.
+  - Resolves participant's \`githubUserId\` from \`ExternalIdentity\`. (Tip: In local development with fake identity, configure \`FAKE_USER_GITHUB_ID=<your-numeric-id>\` in \`.env\` to match your real GitHub user ID, which you can find via \`https://api.github.com/users/<username>\`).
   - Queries GitHub PRs for the repository via \`GithubAppClient\`.
   - Finds the PR where \`BigInt(pr.user.id) === identity.githubUserId\` and title matches \`[week-XX]\`.
   - Evaluates status:

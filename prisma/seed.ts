@@ -89,6 +89,10 @@ async function main(): Promise<void> {
     },
   });
 
+  const fakeGithubUserId = process.env.FAKE_USER_GITHUB_ID
+    ? BigInt(process.env.FAKE_USER_GITHUB_ID)
+    : BigInt(1001);
+
   const user = await prisma.user.upsert({
     where: { email: "participant@elwarsha.dev" },
     update: { displayName: "Test Participant" },
@@ -100,9 +104,27 @@ async function main(): Promise<void> {
         create: {
           provider: "fake",
           providerSubject: "fake-user-1",
-          githubUserId: 1001,
+          githubUserId: fakeGithubUserId,
         },
       },
+    },
+  });
+
+  await prisma.externalIdentity.upsert({
+    where: {
+      provider_providerSubject: {
+        provider: "fake",
+        providerSubject: "fake-user-1",
+      },
+    },
+    update: {
+      githubUserId: fakeGithubUserId,
+    },
+    create: {
+      userId: user.id,
+      provider: "fake",
+      providerSubject: "fake-user-1",
+      githubUserId: fakeGithubUserId,
     },
   });
 
